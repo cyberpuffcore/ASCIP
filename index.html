@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCIP | Autonomous Supply Chain Intelligence Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .terminal-bg { background: linear-gradient(180deg, #020617 0%, #0f172a 100%); }
+        .glow-blue { box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="terminal-bg text-white font-sans min-h-screen">
+
+    <div id="sms-toast" class="fixed top-5 right-5 bg-green-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 transform translate-x-[150%] transition-transform duration-500 flex items-center space-x-3 border border-green-400">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+        <div>
+            <p class="font-black text-xs uppercase tracking-widest">Protocol Dispatched</p>
+            <p class="text-[10px] opacity-90">SMS instructions + GPS coordinates sent to Driver.</p>
+        </div>
+    </div>
+
+    <div class="container mx-auto p-6 max-w-6xl">
+        <header class="flex justify-between items-center mb-10 border-b border-slate-800 pb-6">
+            <div>
+                <h1 class="text-4xl font-black tracking-tighter text-blue-500">ASCIP</h1>
+                <p class="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em] mt-1">Autonomous Decision Engine // India Cold-Chain Live</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div class="text-right">
+                    <p class="text-green-400 text-xs font-black uppercase">System Active</p>
+                    <p class="text-slate-500 text-[10px] font-mono">LATENCY: 0.04ms</p>
+                </div>
+                <div class="h-3 w-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_#22c55e]"></div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-4 space-y-6">
+                <div class="glass p-6 rounded-2xl border border-slate-800 glow-blue">
+                    <h2 class="text-[11px] font-bold mb-4 text-slate-400 uppercase tracking-widest">Incoming Driver Feed</h2>
+                    <textarea id="driverInput" 
+                        class="w-full h-44 bg-black/40 border border-slate-700 rounded-xl p-4 text-sm text-blue-100 placeholder-slate-700 focus:border-blue-500 focus:outline-none transition-all font-mono" 
+                        placeholder="Awaiting transmission..."></textarea>
+                    
+                    <button onclick="processCrisis()" 
+                        class="w-full mt-4 bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-blue-900/40">
+                        Execute Autonomous Research
+                    </button>
+                </div>
+
+                <div class="glass p-4 rounded-xl border border-slate-800 opacity-50">
+                    <div class="text-[10px] font-mono text-slate-400 space-y-1">
+                        <p>> GEMINI_1.5_PRO_AGENT: CONNECTED</p>
+                        <p>> REGIONAL_LANG_DB: 22 LOADED</p>
+                        <p>> ROI_VAL_ENGINE: ONLINE</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 glass p-8 rounded-2xl border border-slate-800 min-h-[500px] relative overflow-hidden">
+                <h2 class="text-[11px] font-bold mb-8 text-slate-400 uppercase tracking-widest">15-Second Action Summary</h2>
+                
+                <div id="loader" class="hidden absolute inset-0 glass z-10 flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+                    <p class="text-blue-400 font-mono text-[10px] tracking-[0.3em] animate-pulse">AUTONOMOUS RESEARCH IN PROGRESS</p>
+                </div>
+
+                <div id="idle" class="flex flex-col items-center justify-center h-full py-20 opacity-20">
+                    <svg class="w-20 h-20 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <p class="text-xs font-bold uppercase tracking-widest">Awaiting Live Alert Transmission</p>
+                </div>
+
+                <div id="results" class="hidden space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-black/40 p-5 rounded-xl border border-slate-800/50">
+                            <p class="text-[9px] text-slate-500 font-bold uppercase">Cargo Segment</p>
+                            <p id="res-cargo" class="text-lg font-bold text-blue-200 mt-1"></p>
+                        </div>
+                        <div class="bg-black/40 p-5 rounded-xl border border-slate-800/50">
+                            <p class="text-[9px] text-slate-500 font-bold uppercase">Language Detected</p>
+                            <p id="res-lang" class="text-lg font-bold text-blue-200 mt-1"></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/40 p-5 rounded-xl border-l-4 border-amber-500">
+                        <p class="text-[9px] text-slate-500 font-bold uppercase">Crisis Diagnosis (AI Translation)</p>
+                        <p id="res-problem" class="text-slate-200 mt-1 font-medium"></p>
+                    </div>
+
+                    <div class="bg-black/40 p-5 rounded-xl border border-slate-800/50">
+                        <p class="text-[9px] text-slate-500 font-bold uppercase">Nearest Rescue Hub</p>
+                        <p id="res-sol" class="text-slate-200 mt-1 font-medium"></p>
+                    </div>
+
+                    <div class="bg-blue-500/10 p-5 rounded-xl border border-blue-500/20">
+                        <p class="text-[9px] text-blue-500 font-bold uppercase tracking-widest text-center">ROI Math: Rescue Cost vs. Loss</p>
+                        <p id="res-roi" class="text-blue-100 mt-1 text-center font-mono text-lg font-bold"></p>
+                    </div>
+
+                    <div class="pt-4">
+                        <button id="res-action" onclick="dispatchSMS()" class="w-full py-5 rounded-2xl text-xl font-black uppercase tracking-widest shadow-2xl transition-all scale-100 hover:scale-[1.02] active:scale-95"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // MOCK DATABASE FOR HACKATHON PRESENTATION
+        const MOCK_DATA = {
+            "hindi": {
+                cargo: "Pharma/Vaccines (₹50L)",
+                lang: "Hindi Detected",
+                problem: "Refrigeration unit failed near Nagpur NH44. Current Temp: 18°C.",
+                sol: "Reroute to Nagpur Cold-Hub (14km away)",
+                roi: "Rescue: ₹12.5k | Savings: ₹50,00,000",
+                action: "AUTHORISE RESCUE",
+                color: "bg-green-600"
+            },
+            "tamil": {
+                cargo: "Dairy Products (₹8L)",
+                lang: "Tamil Detected",
+                problem: "Compressor leakage reported. Spoilage window: 4 hours.",
+                sol: "Contact Mobile Repair Unit (Chennai Bypass Hub)",
+                roi: "Repair: ₹5.5k | Savings: ₹8,00,000",
+                action: "DEPLOY REPAIR UNIT",
+                color: "bg-blue-600"
+            },
+            "marathi": {
+                cargo: "Frozen Seafood (₹22L)",
+                lang: "Marathi Detected",
+                problem: "Mechanical breakdown. Rerouting to storage required.",
+                sol: "Transfer to Pune-Central Cold Storage",
+                roi: "Storage: ₹8.2k | Savings: ₹22,00,000",
+                action: "AUTHORISE TRANSFER",
+                color: "bg-green-600"
+            }
+        };
+
+        function processCrisis() {
+            const input = document.getElementById('driverInput').value.toLowerCase();
+            const loader = document.getElementById('loader');
+            const results = document.getElementById('results');
+            const idle = document.getElementById('idle');
+
+            if(!input) return;
+
+            idle.classList.add('hidden');
+            loader.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            // Simulate the "Thinking" delay of the AI Agent
+            setTimeout(() => {
+                let key = "hindi"; 
+                // Detection logic: searches input for regional keywords
+                if(input.includes("tamil") || input.includes("sapadu") || input.includes("vandi")) key = "tamil";
+                if(input.includes("marathi") || input.includes("pune") || input.includes("zala")) key = "marathi";
+
+                const data = MOCK_DATA[key];
+                
+                document.getElementById('res-cargo').innerText = data.cargo;
+                document.getElementById('res-lang').innerText = data.lang;
+                document.getElementById('res-problem').innerText = data.problem;
+                document.getElementById('res-sol').innerText = data.sol;
+                document.getElementById('res-roi').innerText = data.roi;
+                
+                const btn = document.getElementById('res-action');
+                btn.innerText = data.action;
+                btn.className = `w-full py-5 rounded-2xl text-xl font-black uppercase tracking-widest shadow-2xl transition-all ${data.color}`;
+
+                loader.classList.add('hidden');
+                results.classList.remove('hidden');
+            }, 1800);
+        }
+
+        function dispatchSMS() {
+            const toast = document.getElementById('sms-toast');
+            const btn = document.getElementById('res-action');
+
+            // Show SMS dispatch notification
+            toast.style.transform = "translateX(0)";
+            
+            // Visual feedback on button
+            btn.innerText = "PROTOCOL DISPATCHED";
+            btn.classList.replace('bg-green-600', 'bg-slate-700');
+            btn.classList.replace('bg-blue-600', 'bg-slate-700');
+            btn.disabled = true;
+
+            setTimeout(() => {
+                toast.style.transform = "translateX(150%)";
+            }, 4500);
+        }
+    </script>
+</body>
+</html>
